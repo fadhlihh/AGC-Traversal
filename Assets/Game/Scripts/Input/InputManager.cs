@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
+    public Action<Vector2> OnMoveInput;
     private void Update()
     {
         CheckMovementInput();
@@ -21,8 +22,8 @@ public class InputManager : MonoBehaviour
     {
         float verticalAxis = Input.GetAxis("Vertical");
         float horizontalAxis = Input.GetAxis("Horizontal");
-        Debug.Log("Vertical Axis: " + verticalAxis);
-        Debug.Log("Horizontal Axis: " + horizontalAxis);
+        Vector2 inputAxis = new Vector2(horizontalAxis, verticalAxis);
+        OnMoveInput(inputAxis);
     }
 
     private void CheckSprintInput()
