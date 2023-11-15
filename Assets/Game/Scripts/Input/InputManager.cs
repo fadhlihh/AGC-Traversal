@@ -6,6 +6,8 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     public Action<Vector2> OnMoveInput;
+    public Action<bool> OnSprintInput;
+
     private void Update()
     {
         CheckMovementInput();
@@ -23,19 +25,30 @@ public class InputManager : MonoBehaviour
         float verticalAxis = Input.GetAxis("Vertical");
         float horizontalAxis = Input.GetAxis("Horizontal");
         Vector2 inputAxis = new Vector2(horizontalAxis, verticalAxis);
-        OnMoveInput(inputAxis);
+        if (OnMoveInput != null)
+        {
+            OnMoveInput(inputAxis);
+        }
     }
 
     private void CheckSprintInput()
     {
-        bool isHoldSprintInput = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool isHoldSprintInput = Input.GetKey(KeyCode.LeftShift) ||
+                                    Input.GetKey(KeyCode.RightShift);
+
         if (isHoldSprintInput)
         {
-            Debug.Log("Sprinting");
+            if (OnSprintInput != null)
+            {
+                OnSprintInput(true);
+            }
         }
         else
         {
-            Debug.Log("Not Sprinting");
+            if (OnSprintInput != null)
+            {
+                OnSprintInput(false);
+            }
         }
     }
 

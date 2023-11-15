@@ -1341,6 +1341,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _input: {fileID: 1846996563}
   _walkSpeed: 350
+  _sprintSpeed: 450
+  _walkSprintTransition: 30
+  _rotationSmoothTime: 0.1
 --- !u!54 &919132147687151893
 Rigidbody:
   m_ObjectHideFlags: 0
