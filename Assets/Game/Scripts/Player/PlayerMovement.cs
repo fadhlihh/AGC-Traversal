@@ -6,8 +6,11 @@ public class PlayerMovement : MonoBehaviour
     private InputManager _input;
     [SerializeField]
     private float _walkSpeed;
+    [SerializeField]
+    private float _rotationSmoothTime = 0.1f;
 
     private Rigidbody _rigidbody;
+    private float _rotationSmoothVelocity;
 
     private void Awake()
     {
@@ -22,7 +25,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move(Vector2 axisDirection)
     {
-        Vector3 movementDirection = new Vector3(axisDirection.x, 0, axisDirection.y);
-        _rigidbody.AddForce(movementDirection * _walkSpeed * Time.deltaTime);
+        if (axisDirection.magnitude >= 0.1)
+        {
+            float rotationAngle = Mathf.Atan2(axisDirection.x,
+                                                axisDirection.y) * Mathf.Rad2Deg;
+            float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, rotationAngle, ref _rotationSmoothVelocity, _rotationSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, smoothAngle, 0f);
+            Vector3 movementDirection = Quaternion.Euler(0f, rotationAngle, 0f) * Vector3.forward;
+            _rigidbody.AddForce(movementDirection * Time.deltaTime * _walkSpeed);
+        }
     }
 }
