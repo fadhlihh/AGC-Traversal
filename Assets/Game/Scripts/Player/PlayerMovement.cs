@@ -188,10 +188,12 @@ public class PlayerMovement : MonoBehaviour
         bool isNotClimbing = _playerStance != PlayerStance.Climb;
         if (isInFrontOfClimbingWall && _isGrounded && isNotClimbing)
         {
+            _cameraManager.SetFPSClampedCamera(true, transform.rotation.eulerAngles);
             Vector3 offset = (transform.forward * _climbOffset.z) - (Vector3.up * _climbOffset.y);
             transform.position = hit.point - offset;
             _playerStance = PlayerStance.Climb;
             _rigidbody.useGravity = false;
+            _cameraManager.SetTPSFieldOfView(70);
         }
     }
 
@@ -199,9 +201,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerStance == PlayerStance.Climb)
         {
+            _cameraManager.SetFPSClampedCamera(false, transform.rotation.eulerAngles);
             _playerStance = PlayerStance.Stand;
             _rigidbody.useGravity = true;
             transform.position -= transform.forward * 1f;
+            _cameraManager.SetTPSFieldOfView(40);
         }
     }
 
