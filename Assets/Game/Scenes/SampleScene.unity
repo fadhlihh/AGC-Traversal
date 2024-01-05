@@ -2554,6 +2554,7 @@ GameObject:
   - component: {fileID: 919132147687151892}
   - component: {fileID: 919132147687151893}
   - component: {fileID: 919132147687151894}
+  - component: {fileID: 919132147687151895}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2576,9 +2577,10 @@ MonoBehaviour:
   _input: {fileID: 1846996563}
   _walkSpeed: 350
   _sprintSpeed: 450
-  _walkSprintTransition: 30
+  _crouchSpeed: 325
+  _walkSprintTransition: 60
   _rotationSmoothTime: 0.1
-  _jumpForce: 280
+  _jumpForce: 110
   _groundDetector: {fileID: 510609924}
   _detectorRadius: 0.2
   _groundLayer:
@@ -2646,6 +2648,27 @@ CapsuleCollider:
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!95 &919132147687151895
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132147687151891}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5b3e53c3c9eb4b845be10ce3f7104a29, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!23 &961496884580465819
 MeshRenderer:
   m_ObjectHideFlags: 0
