@@ -138,6 +138,9 @@ public class PlayerMovement : MonoBehaviour
             Vector3 vertical = axisDirection.y * transform.up;
             movementDirection = horizontal + vertical;
             _rigidbody.AddForce(movementDirection * Time.deltaTime * _climbSpeed);
+            Vector3 velocity = new Vector3(_rigidbody.velocity.x, _rigidbody.velocity.y, 0);
+            _animator.SetFloat("ClimbVelocityY", velocity.magnitude * axisDirection.y);
+            _animator.SetFloat("ClimbVelocityX", velocity.magnitude * axisDirection.x);
         }
     }
 
@@ -208,6 +211,7 @@ public class PlayerMovement : MonoBehaviour
             Vector3 offset = (transform.forward * _climbOffset.z) - (Vector3.up * _climbOffset.y);
             transform.position = hit.point - offset;
             _playerStance = PlayerStance.Climb;
+            _animator.SetBool("IsClimbing", true);
             _rigidbody.useGravity = false;
             _cameraManager.SetTPSFieldOfView(70);
         }
@@ -219,6 +223,7 @@ public class PlayerMovement : MonoBehaviour
         {
             _cameraManager.SetFPSClampedCamera(false, transform.rotation.eulerAngles);
             _playerStance = PlayerStance.Stand;
+            _animator.SetBool("IsClimbing", false);
             _rigidbody.useGravity = true;
             transform.position -= transform.forward * 1f;
             _cameraManager.SetTPSFieldOfView(40);
