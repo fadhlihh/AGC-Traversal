@@ -46,6 +46,12 @@ public class PlayerMovement : MonoBehaviour
     private float _glideSpeed;
     [SerializeField]
     private float _airDrag;
+    [SerializeField]
+    private Vector3 _glideRotationSpeed;
+    [SerializeField]
+    private float _minGlideRotationX;
+    [SerializeField]
+    private float _maxGlideRotationX;
 
     private Rigidbody _rigidbody;
     private CapsuleCollider _collider;
@@ -110,6 +116,7 @@ public class PlayerMovement : MonoBehaviour
         bool isPlayerStanding = _playerStance == PlayerStance.Stand;
         bool isPlayerCrouch = _playerStance == PlayerStance.Crouch;
         bool isPlayerClimbing = _playerStance == PlayerStance.Climb;
+        bool isPlayerGliding = _playerStance == PlayerStance.Glide;
         if (isPlayerStanding || isPlayerCrouch)
         {
             switch (_cameraManager.CameraState)
@@ -150,6 +157,15 @@ public class PlayerMovement : MonoBehaviour
             Vector3 velocity = new Vector3(_rigidbody.velocity.x, _rigidbody.velocity.y, 0);
             _animator.SetFloat("ClimbVelocityY", velocity.magnitude * axisDirection.y);
             _animator.SetFloat("ClimbVelocityX", velocity.magnitude * axisDirection.x);
+        }
+        else if (isPlayerGliding)
+        {
+            Vector3 rotationDegree = transform.rotation.eulerAngles;
+            rotationDegree.x += _glideRotationSpeed.x * axisDirection.y * Time.deltaTime;
+            rotationDegree.x = Mathf.Clamp(rotationDegree.x, _minGlideRotationX, _maxGlideRotationX);
+            rotationDegree.z += _glideRotationSpeed.z * axisDirection.x * Time.deltaTime;
+            rotationDegree.y += _glideRotationSpeed.y * axisDirection.x * Time.deltaTime;
+            transform.rotation = Quaternion.Euler(rotationDegree);
         }
     }
 
@@ -272,7 +288,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerStance != PlayerStance.Glide && !_isGrounded)
         {
+            _cameraManager.SetFPSClampedCamera(true, transform.rotation.eulerAngles);
             _playerStance = PlayerStance.Glide;
+            _animator.SetBool("IsGliding", true);
         }
     }
 
@@ -280,7 +298,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerStance == PlayerStance.Glide)
         {
+            _cameraManager.SetFPSClampedCamera(false, transform.rotation.eulerAngles);
             _playerStance = PlayerStance.Stand;
+            _animator.SetBool("IsGliding", false);
         }
     }
 
