@@ -12,6 +12,8 @@ public class InputManager : MonoBehaviour
     public Action OnCancelClimb;
     public Action OnChangePOV;
     public Action OnCrouchInput;
+    public Action OnGlideInput;
+    public Action OnCancelGlide;
 
     private void Update()
     {
@@ -102,7 +104,7 @@ public class InputManager : MonoBehaviour
         bool isPressGlideInput = Input.GetKeyDown(KeyCode.G);
         if (isPressGlideInput)
         {
-            Debug.Log("Glide");
+            OnGlideInput();
         }
     }
 
@@ -114,6 +116,7 @@ public class InputManager : MonoBehaviour
             if (OnCancelClimb != null)
             {
                 OnCancelClimb();
+                OnCancelGlide();
             }
         }
     }

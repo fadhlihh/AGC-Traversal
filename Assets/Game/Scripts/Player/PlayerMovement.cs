@@ -42,6 +42,10 @@ public class PlayerMovement : MonoBehaviour
     private Transform _cameraTransform;
     [SerializeField]
     private CameraManager _cameraManager;
+    [SerializeField]
+    private float _glideSpeed;
+    [SerializeField]
+    private float _airDrag;
 
     private Rigidbody _rigidbody;
     private CapsuleCollider _collider;
@@ -69,6 +73,8 @@ public class PlayerMovement : MonoBehaviour
         _input.OnClimbInput += StartClimb;
         _input.OnCancelClimb += CancelClimb;
         _input.OnCrouchInput += Crouch;
+        _input.OnGlideInput += StartGlide;
+        _input.OnCancelGlide += CancelGlide;
         _cameraManager.OnChangePerspective += ChangePerspective;
     }
 
@@ -76,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckIsGrounded();
         CheckStep();
+        Glide();
     }
 
     private void OnDestroy()
@@ -86,6 +93,8 @@ public class PlayerMovement : MonoBehaviour
         _input.OnClimbInput -= StartClimb;
         _input.OnCancelClimb -= CancelClimb;
         _input.OnCrouchInput -= Crouch;
+        _input.OnGlideInput -= StartGlide;
+        _input.OnCancelGlide -= CancelGlide;
         _cameraManager.OnChangePerspective -= ChangePerspective;
     }
 
@@ -177,6 +186,10 @@ public class PlayerMovement : MonoBehaviour
         _isGrounded = Physics.CheckSphere(_groundDetector.position,
                                             _detectorRadius, _groundLayer);
         _animator.SetBool("IsGrounded", _isGrounded);
+        if (_isGrounded)
+        {
+            CancelGlide();
+        }
     }
 
     private void CheckStep()
@@ -252,6 +265,35 @@ public class PlayerMovement : MonoBehaviour
             _playerStance = PlayerStance.Stand;
             _animator.SetBool("IsCrouch", false);
             _speed = _walkSpeed;
+        }
+    }
+
+    private void StartGlide()
+    {
+        if (_playerStance != PlayerStance.Glide && !_isGrounded)
+        {
+            _playerStance = PlayerStance.Glide;
+        }
+    }
+
+    private void CancelGlide()
+    {
+        if (_playerStance == PlayerStance.Glide)
+        {
+            _playerStance = PlayerStance.Stand;
+        }
+    }
+
+    private void Glide()
+    {
+        if (_playerStance == PlayerStance.Glide)
+        {
+            Vector3 playerRotation = transform.rotation.eulerAngles;
+            float lift = playerRotation.x;
+            Vector3 upForce = transform.up * (lift + _airDrag);
+            Vector3 forwardForce = transform.forward * _glideSpeed;
+            Vector3 totalForce = upForce + forwardForce;
+            _rigidbody.AddForce(totalForce * Time.deltaTime);
         }
     }
 }
