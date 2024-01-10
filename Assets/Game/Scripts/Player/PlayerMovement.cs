@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -52,6 +53,16 @@ public class PlayerMovement : MonoBehaviour
     private float _minGlideRotationX;
     [SerializeField]
     private float _maxGlideRotationX;
+    [SerializeField]
+    private float _resetComboInterval;
+    [SerializeField]
+    private Transform _hitDetector;
+    [SerializeField]
+    private float _hitDetectorRadius;
+    [SerializeField]
+    private LayerMask _hitLayer;
+    [SerializeField]
+    private PlayerAudioManager _playerAudioManager;
 
     private Rigidbody _rigidbody;
     private CapsuleCollider _collider;
@@ -60,6 +71,9 @@ public class PlayerMovement : MonoBehaviour
     private bool _isGrounded;
     private PlayerStance _playerStance;
     private Animator _animator;
+    private bool _isPunching;
+    private int _combo = 0;
+    private Coroutine _resetCombo;
 
     private void Awake()
     {
@@ -81,6 +95,7 @@ public class PlayerMovement : MonoBehaviour
         _input.OnCrouchInput += Crouch;
         _input.OnGlideInput += StartGlide;
         _input.OnCancelGlide += CancelGlide;
+        _input.OnPunchInput += Punch;
         _cameraManager.OnChangePerspective += ChangePerspective;
     }
 
@@ -101,6 +116,7 @@ public class PlayerMovement : MonoBehaviour
         _input.OnCrouchInput -= Crouch;
         _input.OnGlideInput -= StartGlide;
         _input.OnCancelGlide -= CancelGlide;
+        _input.OnPunchInput -= Punch;
         _cameraManager.OnChangePerspective -= ChangePerspective;
     }
 
@@ -117,7 +133,7 @@ public class PlayerMovement : MonoBehaviour
         bool isPlayerCrouch = _playerStance == PlayerStance.Crouch;
         bool isPlayerClimbing = _playerStance == PlayerStance.Climb;
         bool isPlayerGliding = _playerStance == PlayerStance.Glide;
-        if (isPlayerStanding || isPlayerCrouch)
+        if ((isPlayerStanding || isPlayerCrouch) && !_isPunching)
         {
             switch (_cameraManager.CameraState)
             {
@@ -291,6 +307,7 @@ public class PlayerMovement : MonoBehaviour
             _cameraManager.SetFPSClampedCamera(true, transform.rotation.eulerAngles);
             _playerStance = PlayerStance.Glide;
             _animator.SetBool("IsGliding", true);
+            _playerAudioManager.PlayGlideSfx();
         }
     }
 
@@ -301,6 +318,7 @@ public class PlayerMovement : MonoBehaviour
             _cameraManager.SetFPSClampedCamera(false, transform.rotation.eulerAngles);
             _playerStance = PlayerStance.Stand;
             _animator.SetBool("IsGliding", false);
+            _playerAudioManager.StopGlideSfx();
         }
     }
 
@@ -314,6 +332,52 @@ public class PlayerMovement : MonoBehaviour
             Vector3 forwardForce = transform.forward * _glideSpeed;
             Vector3 totalForce = upForce + forwardForce;
             _rigidbody.AddForce(totalForce * Time.deltaTime);
+        }
+    }
+
+    private void Punch()
+    {
+        if (!_isPunching && _playerStance == PlayerStance.Stand)
+        {
+            _isPunching = true;
+            if (_combo < 3)
+            {
+                _combo = _combo + 1;
+            }
+            else
+            {
+                _combo = 1;
+            }
+            _animator.SetInteger("Combo", _combo);
+            _animator.SetTrigger("Punch");
+        }
+    }
+
+    private void EndPunch()
+    {
+        _isPunching = false;
+        if (_resetCombo != null)
+        {
+            StopCoroutine(_resetCombo);
+        }
+        _resetCombo = StartCoroutine(ResetCombo());
+    }
+
+    private IEnumerator ResetCombo()
+    {
+        yield return new WaitForSeconds(_resetComboInterval);
+        _combo = 0;
+    }
+
+    private void Hit()
+    {
+        Collider[] hitObjects = Physics.OverlapSphere(_hitDetector.position, _hitDetectorRadius, _hitLayer);
+        for (int i = 0; i < hitObjects.Length; i++)
+        {
+            if (hitObjects[i].gameObject != null)
+            {
+                Destroy(hitObjects[i].gameObject);
+            }
         }
     }
 }
